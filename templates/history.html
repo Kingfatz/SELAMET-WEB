@@ -1,0 +1,95 @@
+{% extends "layout.html" %}
+{% block title %}Riwayat{% endblock %}
+{% block page_title %}Riwayat{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <div class="filter-pills">
+    {% for key, label in [('today','Hari Ini'), ('week','Minggu'), ('month','Bulan'), ('year','Tahun')] %}
+    <a href="{{ url_for('history.index', period=key) }}" class="filter-pill {{ 'active' if period==key }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('history.export_csv', period=period) }}" class="btn-outline-soft d-flex align-items-center gap-2">
+      <span class="material-symbols-rounded" style="font-size:18px;">table_view</span> Ekspor Excel
+    </a>
+    <a href="{{ url_for('history.export_pdf', period=period) }}" class="btn-honey d-flex align-items-center gap-2">
+      <span class="material-symbols-rounded" style="font-size:18px;">picture_as_pdf</span> Ekspor PDF
+    </a>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-4">
+    <div class="card-soft card-accent card-accent-coral" style="height:220px;">
+      <p class="card-label mb-2">Riwayat Suhu</p>
+      <div style="height:170px;"><canvas id="tempChart"></canvas></div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card-soft card-accent card-accent-cyan" style="height:220px;">
+      <p class="card-label mb-2">Riwayat Kelembapan</p>
+      <div style="height:170px;"><canvas id="humChart"></canvas></div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card-soft card-accent card-accent-sage" style="height:220px;">
+      <p class="card-label mb-2">Riwayat Kesehatan Lebah</p>
+      <div style="height:170px;"><canvas id="healthChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12">
+    <div class="section-title">
+      <h2>Riwayat Pemantauan</h2>
+      <span class="badge-pill badge-info">Aktivasi misting: {{ misting_events_count }}</span>
+    </div>
+    <div class="card-soft card-accent card-accent-gold p-0">
+      <div class="table-scroll">
+        <table class="table-selamet">
+          <thead>
+            <tr>
+              <th>Tanggal</th><th>Suhu (°C)</th><th>Kelembapan (%)</th><th>Kesehatan Lebah</th>
+              <th>Stres Panas</th><th>Misting</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in readings %}
+            <tr>
+              <td>{{ r.recorded_at.strftime('%d %b, %H:%M') }}</td>
+              <td>{{ r.indoor_temp_c }}</td>
+              <td>{{ r.indoor_humidity_pct }}</td>
+              <td>{{ r.bee_health_score }}</td>
+              <td>{{ r.heat_stress_risk_pct }}%</td>
+              <td>{{ 'Aktif' if loop.index0 % 7 == 0 else '—' }}</td>
+              <td><span class="badge-pill {{ status_badge_class(r.colony_status) }}">{{ r.colony_status|capitalize }}</span></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="text-center card-sub">Tidak ada data untuk periode ini.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const labels = {{ chart_labels | tojson }};
+  selametLineChart(document.getElementById('tempChart'), labels,
+    [{ label:'Suhu', data: {{ chart_temp | tojson }}, borderColor: SELAMET_COLORS.honey, backgroundColor:'rgba(245,184,46,0.12)' }],
+    { plugins: { legend: { display:false } } });
+  selametLineChart(document.getElementById('humChart'), labels,
+    [{ label:'Kelembapan', data: {{ chart_humidity | tojson }}, borderColor: SELAMET_COLORS.blue, backgroundColor:'rgba(62,124,177,0.06)' }],
+    { plugins: { legend: { display:false } } });
+  selametLineChart(document.getElementById('healthChart'), labels,
+    [{ label:'Kesehatan', data: {{ chart_health | tojson }}, borderColor: SELAMET_COLORS.green, backgroundColor:'rgba(95,141,78,0.06)' }],
+    { plugins: { legend: { display:false } } });
+</script>
+{% endblock %}

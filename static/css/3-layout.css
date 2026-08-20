@@ -1,0 +1,150 @@
+/* ==========================================================================
+   3-layout.css
+   Kerangka halaman: sidebar & header versi "kaca" (glassmorphism) —
+   tembus pandang + blur, mengambang tipis di atas glow background.
+   ========================================================================== */
+
+.app-shell { display: flex; min-height: 100vh; }
+
+/* --------------------------- Sidebar (desktop) --------------------------- */
+
+.sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background: var(--bg-sidebar);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-right: 1px solid rgba(255,255,255,0.08);
+  padding: 22px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 6px 10px 22px; }
+
+.sidebar-brand .logo-mark {
+  width: 40px; height: 40px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.14);
+  box-shadow: var(--glow-soft);
+  display: block;
+}
+
+.sidebar-brand .brand-text b { display: block; font-size: 16.5px; color: var(--sidebar-text); }
+.sidebar-brand .brand-text span { display: block; font-size: 11px; color: var(--sidebar-text-muted); }
+
+/* Label kecil pengelompok menu */
+.nav-group-label {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--sidebar-text-muted); padding: 14px 14px 6px;
+}
+
+/* Nav items — item aktif jadi pil gradient biru→hijau + glow tipis */
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  color: var(--sidebar-text-muted); font-weight: 600; font-size: 13.8px;
+  transition: background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+  position: relative;
+}
+.sidebar .nav-item:hover { background: rgba(255,255,255,0.08); color: var(--sidebar-text); }
+.sidebar .nav-item.active {
+  background: linear-gradient(90deg, var(--grad-blue), var(--grad-green));
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: var(--glow-soft);
+}
+.sidebar .nav-item.active .material-symbols-rounded { color: #FFFFFF; }
+.nav-item .material-symbols-rounded { font-size: 20px; color: var(--sidebar-text-muted); transition: color var(--transition-fast); }
+.sidebar .nav-item:hover .material-symbols-rounded { color: var(--sidebar-text); }
+
+.sidebar-footer { margin-top: auto; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.10); }
+
+.main-col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* --------------------------------- Header (kaca) --------------------------------- */
+
+.topbar {
+  height: var(--header-height);
+  display: flex; align-items: center; gap: 16px; padding: 0 24px;
+  background: var(--bg-topbar);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-bottom: 1px solid var(--border-soft);
+  position: sticky; top: 0; z-index: 20;
+}
+
+.topbar .breadcrumb-title { font-weight: 700; font-size: 16.5px; margin: 0; font-family:"Plus Jakarta Sans",sans-serif; color: var(--text-primary); }
+
+.search-pill {
+  flex: 1; max-width: 340px; display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.35); border: 1px solid var(--border-soft); border-radius: 999px;
+  padding: 8px 16px; color: var(--text-muted);
+}
+[data-theme="dark"] .search-pill { background: rgba(255,255,255,0.05); }
+.search-pill input { border: none; background: transparent; outline: none; width: 100%; font-size: 13.5px; color: var(--text-primary); }
+.search-pill input::placeholder { color: var(--text-muted); }
+.search-pill .material-symbols-rounded { color: var(--sky-blue); font-size: 18px; }
+
+.icon-btn {
+  width: 38px; height: 38px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.35); border: 1px solid var(--border-soft);
+  color: var(--forest-green); position: relative; cursor: pointer;
+}
+[data-theme="dark"] .icon-btn { background: rgba(255,255,255,0.06); color: var(--sky-blue); }
+.icon-btn:hover { background: rgba(255,255,255,0.55); box-shadow: var(--glow-blue); }
+[data-theme="dark"] .icon-btn:hover { background: rgba(255,255,255,0.1); }
+.icon-btn .dot {
+  position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--honey-gold); border: 2px solid var(--bg-topbar);
+  box-shadow: 0 0 6px rgba(34,211,170,0.7);
+}
+
+.avatar {
+  width: 38px; height: 38px; border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--grad-blue), var(--grad-green));
+  color: #FFFFFF; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; font-family:"Plus Jakarta Sans",sans-serif;
+  box-shadow: var(--glow-soft);
+}
+
+.page-body { padding: 24px; padding-bottom: calc(24px + var(--bottomnav-height)); max-width: 1320px; width: 100%; margin: 0 auto; }
+
+/* ------------------------------ Bottom nav (mobile) ------------------------------ */
+
+.bottom-nav {
+  display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  height: var(--bottomnav-height); background: var(--bg-sidebar);
+  backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-top: 1px solid rgba(255,255,255,0.10);
+  align-items: center; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom);
+}
+.bottom-nav a { display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--sidebar-text-muted); font-size: 10px; font-weight: 600; flex: 1; padding: 6px 0; }
+.bottom-nav a.active { color: var(--honey-gold); font-weight: 800; }
+.bottom-nav .material-symbols-rounded { font-size: 21px; }
+
+/* Tombol aksi cepat mengambang (mobile) */
+.fab {
+  position: fixed; right: 18px; bottom: calc(var(--bottomnav-height) + 16px);
+  width: 54px; height: 54px; border-radius: 18px;
+  background: linear-gradient(135deg, var(--grad-blue), var(--grad-green));
+  color: #FFFFFF; display: none; align-items: center; justify-content: center;
+  box-shadow: var(--glow-soft); border: none; z-index: 40;
+}
+.fab:active { transform: scale(0.94); }
+
+/* -------------------------------- Responsif -------------------------------- */
+
+@media (max-width: 991px) {
+  .sidebar { display: none; }
+  .bottom-nav { display: flex; }
+  .fab { display: flex; }
+  .page-body { padding: 16px; padding-bottom: calc(16px + var(--bottomnav-height) + 70px); }
+  .topbar { padding: 0 16px; }
+  .search-pill { display: none; }
+}

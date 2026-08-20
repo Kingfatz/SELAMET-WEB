@@ -1,0 +1,94 @@
+/* ==========================================================================
+   SELAMET — Halaman Login / Autentikasi v4
+   Background terang (Sky Blue muda + Soft Cream), kartu putih bersih di
+   tengah, profesional. TANPA dekorasi lebah, TANPA background gelap.
+   ========================================================================== */
+
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #EAF4FA 0%, #F5F8F6 55%, #F0F7F1 100%);
+  padding: 24px;
+}
+
+.auth-form-col { display: flex; align-items: center; justify-content: center; width: 100%; animation: fadeInUp 500ms ease both; }
+
+.auth-card {
+  width: 100%; max-width: 420px;
+  background: #FFFFFF;
+  border: 1px solid #E1EAE3;
+  border-top: 4px solid var(--forest-green);
+  border-radius: 18px;
+  padding: 36px 32px;
+  box-shadow: 0 8px 28px rgba(38, 51, 46, 0.10);
+}
+
+.auth-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; justify-content: center; text-align: left; }
+
+.auth-logo .logo-mark {
+  width: 50px; height: 50px; border-radius: 13px;
+  display: block;
+}
+
+.auth-logo b { font-size: 20px; display: block; font-family:"Plus Jakarta Sans",sans-serif; font-weight: 800; color: var(--charcoal); }
+.auth-logo span { font-size: 12px; color: #6B7973; display: block; }
+
+.auth-title { font-size: 22px; margin-bottom: 4px; text-align: center; color: var(--charcoal); font-weight: 800; }
+.auth-subtitle { color: #6B7973; font-size: 13.5px; margin-bottom: 22px; text-align: center; }
+
+.form-floating-soft { margin-bottom: 14px; }
+.form-floating-soft label { font-size: 12.5px; font-weight: 700; color: #57645D; margin-bottom: 6px; display: block; }
+
+/* ------------------------------------------------------------------------
+   INPUT — warna dipaksa EKSPLISIT (bukan mengandalkan warisan tema) supaya
+   TIDAK ADA kondisi apa pun (autofill, dark mode warisan, dsb) yang bisa
+   membuat teks tidak terlihat: background selalu putih, teks selalu gelap.
+   ------------------------------------------------------------------------ */
+.auth-card .form-control-soft {
+  width: 100%; border: 1.5px solid #D7E3DA; background: #FFFFFF !important;
+  border-radius: 10px; padding: 11px 14px; font-size: 14px;
+  color: #20352F !important;
+  caret-color: #0F5B4D;
+}
+.auth-card .form-control-soft::placeholder { color: #9AA6A0; }
+.auth-card .form-control-soft:focus {
+  outline: none; border-color: var(--forest-green);
+  box-shadow: 0 0 0 3px rgba(23,74,59,0.14);
+}
+
+/* Perbaikan bug autofill/spellcheck browser (background putih menimpa
+   warna sehingga teks tidak terlihat) — dipaksa tetap putih+gelap karena
+   memang itu warna aslinya di halaman ini, jadi otomatis konsisten. */
+.auth-card .form-control-soft:-webkit-autofill,
+.auth-card .form-control-soft:-webkit-autofill:hover,
+.auth-card .form-control-soft:-webkit-autofill:focus,
+.auth-card .form-control-soft:-webkit-autofill:active {
+  -webkit-text-fill-color: #20352F !important;
+  -webkit-box-shadow: 0 0 0px 1000px #FFFFFF inset !important;
+  box-shadow: 0 0 0px 1000px #FFFFFF inset !important;
+  caret-color: #20352F !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+.oauth-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 11px 14px; border-radius: 10px;
+  border: 1.5px solid #E1EAE3; background: #FFFFFF;
+  font-weight: 700; font-size: 13.8px; color: var(--charcoal);
+  margin-bottom: 10px;
+}
+.oauth-btn:hover { background: #F5F9F6; border-color: #C9DACD; }
+
+.divider-or { display: flex; align-items: center; gap: 12px; margin: 18px 0; color: #9AA6A0; font-size: 12px; font-weight: 600; }
+.divider-or::before, .divider-or::after { content: ""; flex: 1; height: 1px; background: #E1EAE3; }
+
+.auth-links { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-top: 6px; }
+.auth-links a { color: var(--forest-green); font-weight: 700; }
+.auth-links label { color: #57645D; }
+
+.auth-footer-links { margin-top: 24px; text-align: center; font-size: 11.5px; color: #9AA6A0; }
+.auth-footer-links a { color: #57645D; text-decoration: underline; }
+
+@media (max-width: 480px) { .auth-card { padding: 28px 20px; } }

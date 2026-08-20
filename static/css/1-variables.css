@@ -1,0 +1,169 @@
+/* ==========================================================================
+   1-variables.css
+   SELAMET — Redesign "Futuristic Glass" v5
+   Identitas warna: BIRU + HIJAU (tanpa madu/gold). Gaya glassmorphism,
+   flat card diganti kartu kaca tembus pandang + glow tipis, ring/skor
+   pakai gradient biru→hijau. Variabel LAMA dipertahankan namanya supaya
+   semua file lain (JS, template) otomatis ikut berubah tanpa disunting.
+     forest-green   → identitas utama / sidebar (hijau tua)
+     forest-green-l → aksen hijau terang / tombol sekunder
+     sky-blue       → data lingkungan, gradient, glow (biru)
+     honey-gold     → (di-repurpose) aksen teal — CTA & highlight, BUKAN emas
+     warm-orange    → status warning
+     muted-red      → status critical
+   ========================================================================== */
+
+:root {
+  /* ---------------------------------------------------------------- */
+  /* PALET INTI — biru & hijau                                        */
+  /* ---------------------------------------------------------------- */
+  --forest-green: #0F5B4D;
+  --forest-green-light: #16866D;
+  --sage-green: #34D399;
+  --sage-green-deep: #10B981;
+  --sky-blue: #2E9FE0;
+  --sky-blue-light: #67C9F2;
+  --sky-blue-deep: #1D7FC4;
+  --warm-orange: #F28C38;
+  --muted-red: #E5544D;
+
+  /* "honey-gold" di-repurpose jadi TEAL (biru-hijau) — bukan emas lagi.
+     Nama variabel dipertahankan agar template & JS lama tetap kompatibel. */
+  --honey-gold: #22D3AA;
+  --honey-gold-deep: #14B891;
+
+  --soft-cream: #EEF3FA;
+  --white: #FFFFFF;
+  --charcoal: #17222E;
+  --light-gray: #DCE6F0;
+
+  /* Alias lama */
+  --tech-green: var(--forest-green-light);
+  --tech-green-bright: var(--sage-green);
+  --tech-green-deep: var(--forest-green);
+  --emerald: var(--forest-green);
+  --soft-cyan: var(--sky-blue);
+  --soft-coral: var(--warm-orange);
+  --soft-red: var(--muted-red);
+  --amber: var(--honey-gold);
+
+  /* Stop gradient identitas — biru → hijau, dipakai di ring skor,
+     tombol utama, garis grafik utama, dan glow. TANPA dipakai di
+     background besar (background tetap kaca/blur, bukan gradasi penuh). */
+  --grad-blue: #3B82F6;
+  --grad-green: #22D3AA;
+
+  /* ---------------------------------------------------------------- */
+  /* WARNA STATUS                                                      */
+  /* ---------------------------------------------------------------- */
+  --status-healthy: #0E9F6E;
+  --status-healthy-bg: rgba(14, 159, 110, 0.14);
+  --status-warning: #C2740F;
+  --status-warning-bg: rgba(242, 140, 56, 0.16);
+  --status-critical: #C6423B;
+  --status-critical-bg: rgba(229, 84, 77, 0.14);
+  --status-info: #1D7FC4;
+  --status-info-bg: rgba(46, 159, 224, 0.14);
+
+  /* ---------------------------------------------------------------- */
+  /* KACA (GLASSMORPHISM) — MODE TERANG                                */
+  /* ---------------------------------------------------------------- */
+  --bg-app: #EEF3FA;
+  --bg-sidebar: rgba(15, 91, 77, 0.82);
+  --bg-topbar: rgba(255, 255, 255, 0.6);
+  --bg-card: rgba(255, 255, 255, 0.62);
+  --bg-card-alt: rgba(255, 255, 255, 0.4);
+  --bg-card-solid: #FFFFFF;
+  --border-soft: rgba(255, 255, 255, 0.55);
+  --border-softer: rgba(255, 255, 255, 0.35);
+  --glass-blur: 18px;
+  --glass-shine: rgba(255, 255, 255, 0.5);
+
+  --sidebar-text: #D9ECE6;
+  --sidebar-text-muted: rgba(217, 236, 230, 0.62);
+
+  /* ---------------------------------------------------------------- */
+  /* TEKS — MODE TERANG                                                */
+  /* ---------------------------------------------------------------- */
+  --text-primary: #17222E;
+  --text-secondary: #5A6B7C;
+  --text-muted: #8B9AAA;
+  --text-on-accent: #FFFFFF;
+
+  /* ---------------------------------------------------------------- */
+  /* GEOMETRI, BAYANGAN & GLOW                                         */
+  /* ---------------------------------------------------------------- */
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 11px;
+  --shadow-card: 0 8px 32px rgba(30, 64, 110, 0.10), inset 0 1px 0 rgba(255,255,255,0.5);
+  --shadow-card-hover: 0 14px 40px rgba(30, 64, 110, 0.16), inset 0 1px 0 rgba(255,255,255,0.6);
+  --glow-blue: 0 0 18px rgba(59, 130, 246, 0.35);
+  --glow-green: 0 0 18px rgba(34, 211, 170, 0.35);
+  --glow-soft: 0 0 24px rgba(59, 130, 246, 0.16), 0 0 14px rgba(34, 211, 170, 0.12);
+
+  /* ---------------------------------------------------------------- */
+  /* KECEPATAN ANIMASI / TRANSISI                                      */
+  /* ---------------------------------------------------------------- */
+  --transition-fast: 160ms ease;
+  --transition-med: 240ms ease;
+  --transition-slow: 320ms ease;
+
+  /* ---------------------------------------------------------------- */
+  /* UKURAN LAYOUT                                                     */
+  /* ---------------------------------------------------------------- */
+  --sidebar-width: 254px;
+  --header-height: 68px;
+  --bottomnav-height: 68px;
+}
+
+/* ====================================================================
+   MODE GELAP — kaca gelap navy/biru, glow lebih terang
+   ==================================================================== */
+[data-theme="dark"] {
+  --bg-app: #060B14;
+  --bg-sidebar: rgba(6, 20, 26, 0.75);
+  --bg-topbar: rgba(10, 18, 30, 0.55);
+  --bg-card: rgba(20, 32, 48, 0.55);
+  --bg-card-alt: rgba(20, 32, 48, 0.35);
+  --bg-card-solid: #101A28;
+  --border-soft: rgba(255, 255, 255, 0.09);
+  --border-softer: rgba(255, 255, 255, 0.05);
+  --glass-shine: rgba(255, 255, 255, 0.06);
+
+  --sidebar-text: #D9ECE6;
+  --sidebar-text-muted: rgba(217, 236, 230, 0.55);
+
+  --text-primary: #EAF1F8;
+  --text-secondary: #9FB0C2;
+  --text-muted: #647587;
+  --text-on-accent: #FFFFFF;
+
+  --forest-green: #0C4438;
+  --forest-green-light: #1FAE8C;
+  --sage-green: #4CE0AC;
+  --sky-blue: #58B4F0;
+  --sky-blue-light: #8AD4F7;
+  --warm-orange: #F5A566;
+  --muted-red: #F0736C;
+  --honey-gold: #33E8BC;
+  --honey-gold-deep: #1FC49B;
+
+  --grad-blue: #5B9CFB;
+  --grad-green: #33E8BC;
+
+  --status-healthy: #4CE0AC;
+  --status-healthy-bg: rgba(76, 224, 172, 0.16);
+  --status-warning: #F5A566;
+  --status-warning-bg: rgba(245, 165, 102, 0.16);
+  --status-critical: #F0736C;
+  --status-critical-bg: rgba(240, 115, 108, 0.16);
+  --status-info: #58B4F0;
+  --status-info-bg: rgba(88, 180, 240, 0.16);
+
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+  --shadow-card-hover: 0 16px 48px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+  --glow-blue: 0 0 22px rgba(91, 156, 251, 0.45);
+  --glow-green: 0 0 22px rgba(51, 232, 188, 0.4);
+  --glow-soft: 0 0 30px rgba(91, 156, 251, 0.22), 0 0 18px rgba(51, 232, 188, 0.16);
+}

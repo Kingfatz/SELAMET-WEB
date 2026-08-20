@@ -1,0 +1,245 @@
+{% extends "layout.html" %}
+{% block title %}Beranda{% endblock %}
+{% block page_title %}Beranda{% endblock %}
+
+{% block content %}
+
+<!-- ===================== Hero / Welcome Card ===================== -->
+<div class="card-soft card-solid-brand mb-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+      <p class="card-label mb-1">{{ now.strftime('%A, %d %B %Y · %H:%M') }}</p>
+      <h2 style="font-size:22px; margin-bottom:4px;">Selamat datang kembali, {{ current_user.name.split(' ')[0] }}</h2>
+      <p class="card-sub mb-0">
+        {{ current_user.farm_name or "Apiari Anda" }} saat ini
+        <span class="badge-pill {{ status_badge_class(latest.colony_status if latest else 'info') }}" data-live-badge>
+          <span class="dot-sm"></span>
+          <span class="label-text">{{ (latest.colony_status if latest else 'Stabil') | capitalize }}</span>
+        </span>
+      </p>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <div class="text-center">
+        <span class="material-symbols-rounded glow-blue" style="font-size:28px; color:var(--sky-blue);">
+          {{ 'sunny' if weather and weather.condition=='clear' else 'partly_cloudy_day' }}
+        </span>
+        <p class="card-sub mb-0">{{ weather.temp_c if weather else '--' }}°C</p>
+      </div>
+      <div class="text-center">
+        <span class="material-symbols-rounded glow-green" style="font-size:28px; color:var(--sage-green);">water_drop</span>
+        <p class="card-sub mb-0">{{ weather.rain_probability_pct|int if weather else '--' }}% hujan</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== Skor Kesehatan (Deep Forest Green) & Mikroklim (Environmental Blue) ===================== -->
+<div class="row g-3 mb-2">
+  <div class="col-md-6">
+    <div class="card-soft card-solid-emerald hoverable h-100 d-flex flex-row align-items-center gap-3">
+      <div class="ring-wrap">
+        <svg width="96" height="96" viewBox="0 0 96 96">
+          <circle cx="48" cy="48" r="40" fill="none" stroke-width="9" stroke="rgba(255,255,255,0.22)"/>
+          <circle class="ring-value" cx="48" cy="48" r="40" fill="none" stroke-width="9"
+                  data-ring-value="{{ latest.bee_health_score if latest else 0 }}"/>
+        </svg>
+        <div class="ring-center">
+          <span class="num" data-live="bee_health_score" style="color:#fff;">{{ (latest.bee_health_score|round(0)|int) if latest else '--' }}</span>
+          <span class="lbl" style="color:rgba(255,255,255,0.75);">SKOR</span>
+        </div>
+      </div>
+      <div>
+        <p class="card-label mb-1">Skor Kesehatan Lebah</p>
+        <p class="card-value" style="font-size:20px;">
+          {% if latest and latest.bee_health_score >= 80 %}Sangat Baik
+          {% elif latest and latest.bee_health_score >= 55 %}Cukup
+          {% else %}Perlu Perhatian{% endif %}
+        </p>
+        <p class="card-sub" data-live-updated>Langsung · diperbarui {{ human_time_ago(latest.recorded_at) if latest else '' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card-soft card-solid-blue hoverable h-100">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <p class="card-label mb-0" style="color:rgba(255,255,255,0.8);">Status Mikroklim</p>
+        <span class="badge-pill" style="background:rgba(255,255,255,0.25); color:#fff;">
+          <span class="dot-sm" style="background:#fff;"></span>Optimal
+        </span>
+      </div>
+      <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom:1px solid rgba(255,255,255,0.2);">
+        <span style="color:rgba(255,255,255,0.85); font-size:13px;"><span class="material-symbols-rounded" style="font-size:16px; vertical-align:-3px; color:#fff;">device_thermostat</span> Suhu</span>
+        <b style="color:#fff;" data-live="indoor_temp_c">{{ latest.indoor_temp_c if latest else '--' }}°C</b>
+      </div>
+      <div class="d-flex justify-content-between align-items-center pt-2">
+        <span style="color:rgba(255,255,255,0.85); font-size:13px;"><span class="material-symbols-rounded" style="font-size:16px; vertical-align:-3px; color:#fff;">humidity_percentage</span> Kelembapan</span>
+        <b style="color:#fff;" data-live="indoor_humidity_pct">{{ latest.indoor_humidity_pct if latest else '--' }}%</b>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- ===================== Live Camera ===================== -->
+  <div class="col-lg-7">
+    <div class="section-title"><h2>Kamera Langsung</h2></div>
+    <div class="card-soft p-0 overflow-hidden" style="position:relative;" id="cameraStreamBox">
+      <div style="aspect-ratio:16/9; background:#0A0E0C; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px; color:#6C7A70;">
+        {% if cam and cam.status == 'online' and cam.stream_url %}
+          <img src="{{ cam.stream_url }}" alt="Siaran langsung sarang" style="width:100%; height:100%; object-fit:cover;">
+        {% else %}
+          <span class="material-symbols-rounded" style="font-size:40px;">videocam_off</span>
+          <p class="mb-0" style="font-size:13px;">Belum ada siaran kamera yang dikonfigurasi.</p>
+          <a href="{{ url_for('settings.index') }}" class="btn-outline-soft" style="border-color:#0E9F6E; color:#F2F0E8; background:transparent;">Tambah URL Kamera</a>
+        {% endif %}
+      </div>
+      <div class="d-flex justify-content-between align-items-center p-3" style="background:var(--bg-card);">
+        <div class="d-flex align-items-center gap-2">
+          <span class="live-dot" style="background:{{ 'var(--forest-green-light)' if cam and cam.status=='online' else 'var(--status-critical)' }};"></span>
+          <span class="badge-pill {{ status_badge_class(cam.status if cam else 'offline') }}">{{ 'Online' if cam and cam.status=='online' else 'Offline' }}</span>
+          <span class="card-sub mb-0">Sinyal: {{ cam.signal_quality_pct|int if cam else 0 }}%</span>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="icon-btn" title="Segarkan" onclick="location.reload()"><span class="material-symbols-rounded">refresh</span></button>
+          <button class="icon-btn" id="fullscreenBtn" title="Layar Penuh" onclick="toggleCameraFullscreen()">
+            <span class="material-symbols-rounded" id="fullscreenIcon">fullscreen</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="section-title"><h2>Info Kamera</h2></div>
+    <div class="card-soft h-100">
+      <div class="d-flex justify-content-between card-sub mb-2"><span>Nama</span><b style="color:var(--text-primary);">{{ cam.name if cam else '—' }}</b></div>
+      <div class="d-flex justify-content-between card-sub mb-2"><span>Resolusi</span><b style="color:var(--text-primary);">{{ cam.resolution if cam else '—' }}</b></div>
+      <div class="d-flex justify-content-between card-sub mb-2"><span>FPS</span><b style="color:var(--text-primary);">{{ cam.fps if cam else '—' }}</b></div>
+      <div class="d-flex justify-content-between card-sub" style="padding-top:6px; border-top:1px solid var(--border-softer);">
+        <a href="{{ url_for('settings.index') }}" style="color:var(--sky-blue-deep); font-weight:700; font-size:12.8px;">Ubah pengaturan kamera</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mt-1">
+  <!-- ===================== Environmental monitoring ===================== -->
+  <div class="col-lg-7">
+    <div class="section-title"><h2>Pemantauan Lingkungan</h2></div>
+    <div class="row g-3">
+      <div class="col-6">
+        <div class="card-soft card-accent card-accent-coral hoverable h-100">
+          <span class="material-symbols-rounded" style="color:var(--warm-orange); font-size:22px;">thermostat</span>
+          <p class="card-label mt-2 mb-0">Suhu Luar</p>
+          <p class="card-value" style="font-size:19px; color:var(--warm-orange);">{{ latest.outdoor_temp_c if latest else '--' }}°C</p>
+          <div class="sparkline-box"><canvas id="sparkOutdoorTemp"></canvas></div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="card-soft card-accent card-accent-cyan hoverable h-100">
+          <span class="material-symbols-rounded" style="color:var(--sky-blue); font-size:22px;">humidity_low</span>
+          <p class="card-label mt-2 mb-0">Kelembapan Luar</p>
+          <p class="card-value" style="font-size:19px; color:var(--sky-blue);">{{ latest.outdoor_humidity_pct if latest else '--' }}%</p>
+          <div class="sparkline-box"><canvas id="sparkOutdoorHum"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title mt-4"><h2>24 Jam Terakhir</h2></div>
+    <div class="card-soft" style="height:260px;">
+      <canvas id="activityChart"></canvas>
+    </div>
+  </div>
+
+  <!-- ===================== Distribusi Risiko (donut) + Notifications ===================== -->
+  <div class="col-lg-5">
+    {% set risks = [
+      ('Risiko Stres Panas', latest.heat_stress_risk_pct if latest else 0, 'thermostat', 'coral', '#F28C38'),
+      ('Risiko Kekurangan Pakan', latest.food_deficiency_risk_pct if latest else 0, 'nutrition', 'gold', '#F4B942'),
+      ('Risiko Absconding', latest.absconding_risk_pct if latest else 0, 'flight_takeoff', 'red', '#D9534F'),
+      ('Risiko Swarming', latest.swarming_risk_pct if latest else 0, 'groups', 'sage', '#70B77E')
+    ] %}
+    <div class="section-title"><h2>Distribusi Risiko</h2></div>
+    <div class="card-soft mb-4">
+      <div style="height:190px; position:relative;">
+        <canvas id="riskDonut"></canvas>
+      </div>
+      <div class="mt-2">
+        {% for label, val, icon, tone, color in risks %}
+        <div class="d-flex align-items-center justify-content-between py-1">
+          <span class="d-flex align-items-center gap-2" style="font-size:12.5px;">
+            <span style="width:8px; height:8px; border-radius:50%; background:{{ color }}; display:inline-block;"></span>
+            {{ label }}
+          </span>
+          <b style="font-size:12.5px;">{{ val|round(0)|int }}%</b>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="section-title"><h2>Notifikasi Terbaru</h2></div>
+    <div class="card-soft">
+      {% for n in notifications %}
+      <div class="notif-row">
+        <div class="notif-icon" style="background:var(--status-{{ 'critical' if n.category=='danger' else n.category }}-bg);">
+          <span class="material-symbols-rounded" style="font-size:18px; color:var(--status-{{ 'critical' if n.category=='danger' else n.category }});">
+            {% if n.category == 'warning' %}warning{% elif n.category in ('critical','danger') %}error{% elif n.category == 'success' %}check_circle{% else %}info{% endif %}
+          </span>
+        </div>
+        <div>
+          <p class="mb-0" style="font-weight:700; font-size:13.5px;">{{ n.title }}</p>
+          <p class="card-sub mb-0">{{ n.message }}</p>
+          <p class="card-sub mb-0" style="font-size:11px;">{{ human_time_ago(n.created_at) }}</p>
+        </div>
+      </div>
+      {% else %}
+      <p class="card-sub">Belum ada notifikasi.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  /* Tombol Layar Penuh kamera — Fullscreen API pada #cameraStreamBox.
+     Ikon berganti fullscreen <-> keluar fullscreen mengikuti status,
+     juga saat pengguna menekan Esc (event fullscreenchange). */
+  function toggleCameraFullscreen() {
+    const box = document.getElementById('cameraStreamBox');
+    if (!box) return;
+    if (!document.fullscreenElement) {
+      (box.requestFullscreen || box.webkitRequestFullscreen || box.msRequestFullscreen || function(){}).call(box);
+    } else {
+      (document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen || function(){}).call(document);
+    }
+  }
+  document.addEventListener('fullscreenchange', function () {
+    const icon = document.getElementById('fullscreenIcon');
+    if (!icon) return;
+    icon.textContent = document.fullscreenElement ? 'fullscreen_exit' : 'fullscreen';
+  });
+
+  const ctx = document.getElementById('activityChart');
+  selametLineChart(ctx,
+    {{ chart_labels | tojson }},
+    [
+      { label: 'Suhu (°C)', data: {{ chart_temp | tojson }}, borderColor: '#F28C38', backgroundColor: 'rgba(242,140,56,0.10)' },
+      { label: 'Kelembapan (%)', data: {{ chart_humidity | tojson }}, borderColor: '#3FA7C9', backgroundColor: 'rgba(63,167,201,0.10)' },
+      { label: 'Skor Kesehatan', data: {{ chart_health | tojson }}, borderColor: SELAMET_COLORS.green, backgroundColor: 'rgba(22,134,109,0.10)' },
+    ]
+  );
+
+  selametSparkline(document.getElementById('sparkOutdoorTemp'), {{ chart_outdoor_temp | tojson }}, SELAMET_COLORS.coral);
+  selametSparkline(document.getElementById('sparkOutdoorHum'), {{ chart_outdoor_humidity | tojson }}, SELAMET_COLORS.blue);
+
+  selametDoughnut(document.getElementById('riskDonut'),
+    ['Stres Panas', 'Kekurangan Pakan', 'Absconding', 'Swarming'],
+    [{{ latest.heat_stress_risk_pct|round(0)|int if latest else 0 }}, {{ latest.food_deficiency_risk_pct|round(0)|int if latest else 0 }}, {{ latest.absconding_risk_pct|round(0)|int if latest else 0 }}, {{ latest.swarming_risk_pct|round(0)|int if latest else 0 }}],
+    ['#F28C38', '#F4B942', '#D9534F', '#70B77E'],
+    { plugins: { legend: { display:false } }, centerText: { value: '{{ latest.bee_health_score|round(0)|int if latest else "--" }}', label: 'SEHAT' } }
+  );
+</script>
+{% endblock %}

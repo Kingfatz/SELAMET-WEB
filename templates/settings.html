@@ -1,0 +1,126 @@
+{% extends "layout.html" %}
+{% block title %}Pengaturan{% endblock %}
+{% block page_title %}Pengaturan{% endblock %}
+
+{% block content %}
+
+<!-- Profile -->
+<div class="section-title"><h2>Profil</h2></div>
+<form method="POST" action="{{ url_for('settings.update_profile') }}" class="card-soft card-accent card-accent-gold mb-4">
+  <div class="row g-3">
+    <div class="col-6 col-lg-3">
+      <label class="card-label d-block mb-2">Nama</label>
+      <input class="form-control-soft" style="width:100%;" name="name" value="{{ current_user.name }}">
+    </div>
+    <div class="col-6 col-lg-3">
+      <label class="card-label d-block mb-2">Email</label>
+      <input class="form-control-soft" style="width:100%;" name="email" value="{{ current_user.email or '' }}">
+    </div>
+    <div class="col-6 col-lg-3">
+      <label class="card-label d-block mb-2">Nomor HP</label>
+      <input class="form-control-soft" style="width:100%;" name="phone_number" value="{{ current_user.phone_number or '' }}">
+    </div>
+    <div class="col-6 col-lg-3">
+      <label class="card-label d-block mb-2">Nama Peternakan</label>
+      <input class="form-control-soft" style="width:100%; opacity:0.7;" value="{{ current_user.farm_name or '—' }}" disabled>
+      <p class="card-sub mb-0" style="font-size:11px;">Diisi saat pembuatan akun.</p>
+    </div>
+    <div class="col-12">
+      <label class="card-label d-block mb-2">Lokasi Sarang</label>
+      <input class="form-control-soft" style="width:100%; opacity:0.7;" value="{{ current_user.hive_location or '—' }}" disabled>
+      <p class="card-sub mb-0" style="font-size:11px;">Diisi saat pembuatan akun.</p>
+    </div>
+  </div>
+  <button type="submit" class="btn-honey mt-3">Simpan Profil</button>
+</form>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <!-- Notifications -->
+    <div class="section-title"><h2>Pengaturan Notifikasi</h2></div>
+    <form method="POST" action="{{ url_for('settings.update_notifications') }}" class="card-soft card-accent card-accent-sage mb-4 h-100">
+      {% for key, label in [('notify_email','Notifikasi Email'), ('notify_push','Notifikasi Push'), ('notify_sms','Notifikasi SMS')] %}
+      <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom:1px solid var(--light-gray);">
+        <span style="font-weight:600; font-size:13.5px;">{{ label }}</span>
+        <label class="switch">
+          <input type="checkbox" name="{{ key }}" {{ 'checked' if getattr(current_user, key) }}>
+          <span class="slider-toggle"></span>
+        </label>
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn-honey mt-3">Simpan Preferensi</button>
+    </form>
+  </div>
+
+  <div class="col-lg-7">
+    <!-- Bee monitoring thresholds -->
+    <div class="section-title"><h2>Pengaturan Pemantauan Lebah</h2></div>
+    <form method="POST" action="{{ url_for('settings.update_thresholds') }}" class="card-soft card-accent card-accent-coral mb-4 h-100">
+      <div class="row g-3">
+        <div class="col-6">
+          <label class="card-label d-block mb-2">Ambang Suhu (°C)</label>
+          <input class="form-control-soft" style="width:100%;" type="number" step="0.1" name="temp_threshold_c" value="{{ current_user.temp_threshold_c }}">
+        </div>
+        <div class="col-6">
+          <label class="card-label d-block mb-2">Ambang Kelembapan (%)</label>
+          <input class="form-control-soft" style="width:100%;" type="number" step="0.1" name="humidity_threshold_pct" value="{{ current_user.humidity_threshold_pct }}">
+        </div>
+        <div class="col-6">
+          <label class="card-label d-block mb-2">Ambang Stres Panas</label>
+          <input class="form-control-soft" style="width:100%;" type="number" step="0.1" name="heat_stress_threshold" value="{{ current_user.heat_stress_threshold }}">
+        </div>
+        <div class="col-6">
+          <label class="card-label d-block mb-2">Ambang Absconding</label>
+          <input class="form-control-soft" style="width:100%;" type="number" step="0.1" name="absconding_threshold" value="{{ current_user.absconding_threshold }}">
+        </div>
+        <div class="col-12">
+          <label class="card-label d-block mb-2">Frekuensi Prediksi (jam)</label>
+          <input class="form-control-soft" style="width:100%;" type="number" name="prediction_frequency_hours" value="{{ current_user.prediction_frequency_hours }}">
+        </div>
+      </div>
+      <button type="submit" class="btn-honey mt-3">Simpan Ambang Batas</button>
+    </form>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <!-- Camera settings -->
+    <div class="section-title"><h2>Pengaturan Kamera</h2></div>
+    <form method="POST" action="{{ url_for('settings.update_camera') }}" class="card-soft card-accent card-accent-cyan mb-4 h-100">
+      <div class="row g-3">
+        <div class="col-6">
+          <label class="card-label d-block mb-2">Nama Kamera</label>
+          <input class="form-control-soft" style="width:100%;" name="camera_name" value="{{ camera.name if camera else 'Hive Camera 1' }}">
+        </div>
+        <div class="col-6">
+          <label class="card-label d-block mb-2">Resolusi</label>
+          <input class="form-control-soft" style="width:100%;" name="resolution" value="{{ camera.resolution if camera else '1280x720' }}">
+        </div>
+        <div class="col-8">
+          <label class="card-label d-block mb-2">URL Kamera (ESP32-CAM / RTSP / MJPEG)</label>
+          <input class="form-control-soft" style="width:100%;" name="camera_url" placeholder="http://192.168.1.50:81/stream" value="{{ camera.stream_url if camera else '' }}">
+        </div>
+        <div class="col-4">
+          <label class="card-label d-block mb-2">FPS</label>
+          <input class="form-control-soft" style="width:100%;" type="number" name="fps" value="{{ camera.fps if camera else 15 }}">
+        </div>
+      </div>
+      <button type="submit" class="btn-honey mt-3">Simpan Pengaturan Kamera</button>
+    </form>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="section-title"><h2>&nbsp;</h2></div>
+    <div class="card-soft card-accent card-accent-sage h-100">
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="material-symbols-rounded" style="color:var(--sky-blue);">water_drop</span>
+        <p class="card-value mb-0" style="font-size:15px;">Pengaturan Smart Misting</p>
+      </div>
+      <p class="card-sub mb-0">Mode, jeda relay, durasi, dan ambang pemicu pengabutan sekarang diatur langsung di halaman
+        <a href="{{ url_for('misting.index') }}" style="color:var(--sky-blue-deep); font-weight:700;">Smart Misting</a>.</p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

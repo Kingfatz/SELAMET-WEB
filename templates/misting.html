@@ -1,0 +1,146 @@
+{% extends "layout.html" %}
+{% block title %}Smart Misting{% endblock %}
+{% block page_title %}Smart Misting{% endblock %}
+
+{% block content %}
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <!-- Status card -->
+    <div class="card-soft card-accent card-accent-sage mb-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <p class="card-label mb-1">Status Saat Ini</p>
+          <p class="card-value" style="color: {{ 'var(--status-healthy)' if settings.is_on else 'var(--text-muted)' }};">
+            {{ 'NYALA' if settings.is_on else 'MATI' }}
+          </p>
+          <span class="badge-pill badge-info mt-1">Mode {{ 'Otomatis' if settings.mode=='automatic' else 'Manual' }}</span>
+        </div>
+        <span class="material-symbols-rounded" style="font-size:56px; color:{{ 'var(--status-healthy)' if settings.is_on else 'var(--text-muted)' }};">water_drop</span>
+      </div>
+    </div>
+
+    <!-- Control panel -->
+    <div class="section-title"><h2>Panel Kontrol</h2></div>
+    <div class="card-soft card-accent card-accent-gold mb-4">
+      <div class="d-flex flex-wrap gap-2">
+        <form method="POST" action="{{ url_for('misting.toggle') }}">
+          <button type="submit" class="btn-honey">
+            <span class="material-symbols-rounded" style="font-size:18px; vertical-align:-4px;">
+              {{ 'power_settings_new' if not settings.is_on else 'stop_circle' }}
+            </span>
+            {{ 'Nyalakan' if not settings.is_on else 'Matikan' }}
+          </button>
+        </form>
+        <form method="POST" action="{{ url_for('misting.emergency_stop') }}">
+          <button type="submit" class="btn-danger-soft">
+            <span class="material-symbols-rounded" style="font-size:18px; vertical-align:-4px;">emergency</span> Hentikan Darurat
+          </button>
+        </form>
+      </div>
+
+      <form method="POST" action="{{ url_for('misting.update_settings') }}" class="mt-4">
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="card-label d-block mb-2">Mode</label>
+            <select name="mode" class="form-control-soft" style="width:100%;">
+              <option value="automatic" {{ 'selected' if settings.mode=='automatic' }}>Otomatis</option>
+              <option value="manual" {{ 'selected' if settings.mode=='manual' }}>Manual</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="card-label d-block mb-2">Durasi (detik)</label>
+            <input type="number" name="duration_seconds" value="{{ settings.duration_seconds }}" class="form-control-soft" style="width:100%;">
+          </div>
+          <div class="col-6">
+            <label class="card-label d-block mb-2">Suhu Pemicu (°C)</label>
+            <input type="number" step="0.1" name="trigger_temp_c" value="{{ settings.trigger_temp_c }}" class="form-control-soft" style="width:100%;">
+          </div>
+          <div class="col-6">
+            <label class="card-label d-block mb-2">Kelembapan Pemicu (%)</label>
+            <input type="number" step="0.1" name="trigger_humidity_pct" value="{{ settings.trigger_humidity_pct }}" class="form-control-soft" style="width:100%;">
+          </div>
+          <div class="col-6">
+            <label class="card-label d-block mb-2">Jeda Relay (ms)</label>
+            <input type="number" name="relay_delay_ms" value="{{ settings.relay_delay_ms }}" class="form-control-soft" style="width:100%;">
+          </div>
+        </div>
+        <button type="submit" class="btn-outline-soft mt-3">Simpan Jadwal &amp; Ambang Batas</button>
+      </form>
+    </div>
+
+    <div class="section-title"><h2>Riwayat Pengabutan</h2></div>
+    <div class="card-soft card-accent card-accent-cyan" style="height:260px;">
+      <canvas id="mistingChart"></canvas>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="section-title"><h2>Distribusi Jenis Aktivasi</h2></div>
+    <div class="card-soft card-accent card-accent-sage mb-3">
+      <div style="height:170px; position:relative;">
+        <canvas id="triggerDonut"></canvas>
+      </div>
+      <div class="mt-2">
+        <div class="d-flex align-items-center justify-content-between py-1">
+          <span class="d-flex align-items-center gap-2" style="font-size:12.5px;"><span style="width:8px; height:8px; border-radius:50%; background:var(--sage-green); display:inline-block;"></span> Otomatis</span>
+          <b style="font-size:12.5px;">{{ trigger_counts.auto }}</b>
+        </div>
+        <div class="d-flex align-items-center justify-content-between py-1">
+          <span class="d-flex align-items-center gap-2" style="font-size:12.5px;"><span style="width:8px; height:8px; border-radius:50%; background:var(--honey-gold); display:inline-block;"></span> Manual</span>
+          <b style="font-size:12.5px;">{{ trigger_counts.manual }}</b>
+        </div>
+        <div class="d-flex align-items-center justify-content-between py-1">
+          <span class="d-flex align-items-center gap-2" style="font-size:12.5px;"><span style="width:8px; height:8px; border-radius:50%; background:var(--soft-red); display:inline-block;"></span> Darurat</span>
+          <b style="font-size:12.5px;">{{ trigger_counts.emergency_stop }}</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title"><h2>Status Sistem</h2></div>
+    <div class="card-soft card-accent card-accent-coral mb-3">
+      <div class="d-flex justify-content-between card-sub mb-1"><span>Status Relay</span>
+        <span class="badge-pill {{ status_badge_class(settings.relay_status) }}">{{ settings.relay_status | capitalize }}</span>
+      </div>
+      <div class="d-flex justify-content-between card-sub mb-1"><span>Aktivasi Terakhir</span><b style="color:var(--text-primary);">{{ human_time_ago(events[0].started_at) if events else '—' }}</b></div>
+      <div class="d-flex justify-content-between card-sub"><span>Total Aktivasi Hari Ini</span><b style="color:var(--text-primary);">{{ activations_today }}</b></div>
+    </div>
+
+    <div class="section-title"><h2>Aktivasi Terbaru</h2></div>
+    <div class="card-soft card-accent card-accent-gold p-0">
+      <div class="table-scroll" style="max-height:320px;">
+        <table class="table-selamet">
+          <thead><tr><th>Waktu</th><th>Pemicu</th><th>Durasi</th></tr></thead>
+          <tbody>
+            {% for e in events %}
+            <tr>
+              <td>{{ e.started_at.strftime('%d %b, %H:%M') }}</td>
+              <td><span class="badge-pill {{ 'badge-critical' if e.triggered_by=='emergency_stop' else 'badge-info' }}">
+                {% if e.triggered_by == 'manual' %}Manual{% elif e.triggered_by == 'emergency_stop' %}Darurat{% else %}Otomatis{% endif %}
+              </span></td>
+              <td>{{ e.duration_seconds }}dtk</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="text-center card-sub">Belum ada aktivasi.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  selametDoughnut(document.getElementById('triggerDonut'),
+    ['Otomatis', 'Manual', 'Darurat'],
+    [{{ trigger_counts.auto }}, {{ trigger_counts.manual }}, {{ trigger_counts.emergency_stop }}],
+    [SELAMET_COLORS.green, SELAMET_COLORS.honey, SELAMET_COLORS.red],
+    { plugins: { legend: { display:false } } }
+  );
+  selametBarChart(document.getElementById('mistingChart'), {{ chart_labels | tojson }},
+    [{ label:'Durasi (dtk)', data: {{ chart_duration | tojson }}, backgroundColor: SELAMET_COLORS.blue }]);
+</script>
+{% endblock %}
